@@ -148,7 +148,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   try {
     response = await fetch(`/api${path}`, {
       credentials: 'same-origin',
-      headers: { 'content-type': 'application/json' },
+      headers: {
+        'content-type': 'application/json',
+        // The platform proxy terminates TLS, so report the protocol the browser actually used;
+        // transport checks then describe this connection instead of the internal proxy hop.
+        'x-client-proto': typeof window === 'undefined' ? 'https:' : window.location.protocol
+      },
       ...init
     });
   } catch {
