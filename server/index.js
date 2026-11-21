@@ -43,6 +43,22 @@ export const AUTHORIZATION_STATEMENT = 'I own this system or have explicit writt
 const app = express();
 app.disable('x-powered-by');
 app.set('trust proxy', true);
+
+/**
+ * TLS terminates at the platform proxy, so req.secure is only set when the proxy forwards
+ * X-Forwarded-Proto. Fall back to X-Forwarded-Ssl and to the protocol the browser reports,
+ * which is authoritative for the connection the operator actually has.
+ */
+function isSecureTransport(req) {
+  if (req.secure) return true;
+  const raw = req.headers['x-forwarded-proto'];
+  const protos = String(Array.isArray(raw) ? raw.join(',') : raw || '')
+    .split(',')
+    .map((value) => value.trim().toLowerCase());
+  if (protos.includes('https')) return true;
+  if (String(req.headers['x-forwarded-ssl'] || '').toLowerCase() === 'on') return true;
+  return String(req.headers['x-client-proto'] || '').toLowerCase().startsWith('https');
+}
 app.use(express.json({ limit: '256kb' }));
 
 app.use((req, res, next) => {
@@ -87,7 +103,7 @@ app.get('/api/health', (req, res) => {
     time: new Date().toISOString(),
     ai: aiStatus(),
     storage: storageInfo(),
-    secureTransport: req.secure || req.headers['x-forwarded-proto'] === 'https',
+    secureTransport: isSecureTransport(req),
     labs: LAB_CATALOG.length
   });
 });
@@ -194,7 +210,7 @@ app.get('/api/dashboard', requireAuth, async (req, res) => {
     .sort((a, b) => SEVERITY_ORDER.indexOf(a.severity) - SEVERITY_ORDER.indexOf(b.severity))
     .slice(0, 8);
 
-  const secureTransport = Boolean(req.secure || req.headers['x-forwarded-proto'] === 'https');
+  const secureTransport = isSecureTransport(req);
   const factors = [
     { label: 'Encrypted session to SHADOW X', ok: secureTransport, detail: secureTransport ? 'Traffic between this device and the platform is TLS protected.' : 'This connection is plain HTTP. Use the HTTPS deployment URL.' },
     { label: 'Authenticated operator session', ok: true, detail: `Signed in as ${req.user.email}.` },
