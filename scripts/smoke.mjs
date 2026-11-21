@@ -114,12 +114,16 @@ try {
     method: 'POST',
     body: { target: TARGET, authorization: { confirmed: true, attestation: ATTESTATION, target: TARGET } }
   });
-  const websitePayload = JSON.stringify(website.json ?? {});
-  const websiteGrade = website.json?.summary?.grade ?? website.json?.grade;
+  const websiteReport = website.json?.report ?? website.json ?? {};
+  const websitePayload = JSON.stringify(websiteReport);
+  const websiteGrade = websiteReport.summary?.grade;
   record(
     'real website scan returns measured results',
-    website.status === 200 && websitePayload.includes(TARGET) && Boolean(websiteGrade),
-    `status ${website.status}${websiteGrade ? `, grade ${websiteGrade}` : ''}`
+    website.status === 200 &&
+      websitePayload.includes(TARGET) &&
+      Boolean(websiteGrade) &&
+      Array.isArray(websiteReport.findings),
+    `status ${website.status}${websiteGrade ? `, grade ${websiteGrade}` : ''}, ${Array.isArray(websiteReport.findings) ? websiteReport.findings.length : 0} findings`
   );
 
   const network = await request('/api/tools/network-scan', {
