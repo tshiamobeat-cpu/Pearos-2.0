@@ -160,11 +160,11 @@ export async function runCommand(raw: string, ctx: TermContext): Promise<TermLin
       }
       const analysis = analyzePassword(arg);
       return [
-        { kind: 'ok', tag: 'LOCAL', text: `score ${analysis.score}/4 — ${analysis.label} · estimated ${analysis.crackTime.label} to crack offline` },
+        { kind: 'ok', tag: 'LOCAL', text: `score ${analysis.score}/4 — ${analysis.label} · estimated ${analysis.crackTime} to crack offline` },
         { kind: 'out', text: `length ${analysis.length} · entropy ${analysis.entropyBits} bits` },
         ...analysis.checks.map((check) => ({
-          kind: (check.passed ? 'out' : 'err') as TermKind,
-          text: `${check.passed ? '✓' : '✗'} ${check.label}${check.detail ? ` — ${check.detail}` : ''}`
+          kind: (check.pass ? 'out' : 'err') as TermKind,
+          text: `${check.pass ? '✓' : '✗'} ${check.label}${check.detail ? ` — ${check.detail}` : ''}`
         })),
         { kind: 'info', text: 'This value was analysed in memory and deliberately kept out of command history. Prefer the Password Lab for regular use.' }
       ];

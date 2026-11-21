@@ -39,7 +39,7 @@ export default function ReportsScreen() {
           <EmptyState
             icon="doc"
             title="No reports yet"
-            body="Run a website or network assessment and SHADOW X stores the signed report here with findings, severity and fixes."
+            text="Run a website or network assessment and SHADOW X stores the signed report here with findings, severity and fixes."
             action={
               <button className="btn btn-primary" onClick={() => navigate({ name: 'website' })}>
                 <Icon name="globe" size={16} /> Start a website scan

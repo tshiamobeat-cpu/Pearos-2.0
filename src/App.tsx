@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { api, ApiError, type User } from './lib/api';
+import { api, type User } from './lib/api';
 import { Ctx, TOOL_ROUTES, type Health, type Route, type RouteName } from './lib/context';
 import Splash from './components/Splash';
 import { Icon, Logo } from './components/ui';

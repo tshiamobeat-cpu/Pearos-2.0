@@ -164,7 +164,7 @@ export function Metric({ k, v }: { k: string; v: ReactNode }) {
   );
 }
 
-export function EmptyState({ icon, title, text }: { icon: string; title: string; text: string }) {
+export function EmptyState({ icon, title, text, action }: { icon: string; title: string; text: string; action?: ReactNode }) {
   return (
     <div className="card center" style={{ padding: '26px 18px' }}>
       <div style={{ display: 'grid', placeItems: 'center', marginBottom: 10, color: '#2c4150' }}>
@@ -172,6 +172,7 @@ export function EmptyState({ icon, title, text }: { icon: string; title: string;
       </div>
       <h3 className="card-title" style={{ marginBottom: 6 }}>{title}</h3>
       <p className="small muted">{text}</p>
+      {action ? <div style={{ marginTop: 14, display: 'flex', justifyContent: 'center' }}>{action}</div> : null}
     </div>
   );
 }
