@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { Capability, Report, User } from '../lib/api';
 import { exportReportPdf } from '../lib/report-pdf';
 import { SEVERITY_LABEL_ORDER } from '../lib/severity';
@@ -41,7 +41,7 @@ function CapabilityList({ capabilities }: { capabilities: Record<string, Capabil
               </span>
             </div>
             <p className="tiny" style={{ color: 'inherit' }}>{cap.reason}</p>
-            {cap.nativePath ? <p className="tiny mono mt-8" style={{ opacity: 0.8 }}>{cap.nativePath}</p> : null}
+            {cap.nativePath ? <p className="tiny mono mt-8" style={{ opacity: 0.75 }}>{cap.nativePath}</p> : null}
           </div>
         ))}
       </div>
@@ -49,38 +49,8 @@ function CapabilityList({ capabilities }: { capabilities: Record<string, Capabil
   );
 }
 
-export function ReportView({
-  report,
-  user,
-  onBack
-}: {
-  report: Report;
-  user: User | null;
-  onBack?: () => void;
-}) {
-  const [openId, setOpenId] = [
-    undefined as string | undefined,
-    (_: string | undefined) => undefined
-  ] as [string | undefined, (id: string | undefined) => void];
-
-  return <ReportBody report={report} user={user} onBack={onBack} openId={openId} setOpenId={setOpen} />;
-}
-
-import { useState } from 'react';
-
-function ReportBody({
-  report,
-  user,
-  onBack,
-  openId,
-  setOpenId
-}: {
-  report: Report;
-  user: User | null;
-  onBack?: () => void;
-  openId?: string;
-  setOpenId: (id: string | undefined) => void;
-}) {
+export function ReportView({ report, user, onBack }: { report: Report; user: User | null; onBack?: () => void }) {
+  const [openId, setOpenId] = useState<string | undefined>(undefined);
   const counts = report.summary.counts;
   const ephemeral = report.id === 'ephemeral';
 
@@ -91,7 +61,7 @@ function ReportBody({
   return (
     <div className="stack">
       <div className="card card-hero">
-        <div className="row-between" style={{ alignItems: 'flex-start' }}>
+        <div className="row-between" style={{ alignItems: 'flex-start', gap: 12 }}>
           <div className="stack-sm" style={{ gap: 4, minWidth: 0 }}>
             <span className="card-label">{report.type === 'website' ? 'Website assessment' : 'Network assessment'}</span>
             <h2 style={{ fontSize: 18, wordBreak: 'break-word' }}>{report.target}</h2>
@@ -141,7 +111,8 @@ function ReportBody({
           </div>
           <p className="tiny muted mt-8">
             “{report.authorization.statement}” — confirmed {formatDate(report.authorization.confirmedAt)} for{' '}
-            <span className="mono">{report.authorization.target}</span> by {report.authorization.authorizedBy || 'the operator'}.
+            <span className="mono">{report.authorization.target}</span>
+            {report.authorization.authorizedBy ? ` by ${report.authorization.authorizedBy}` : ''}.
           </p>
         </div>
       )}
@@ -173,7 +144,14 @@ function ReportBody({
                     </span>
                     <span className="small" style={{ fontWeight: 600 }}>{finding.title}</span>
                   </span>
-                  <span style={{ color: 'var(--muted-2)', transform: open ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s ease' }}>
+                  <span
+                    style={{
+                      color: 'var(--muted-2)',
+                      transform: open ? 'rotate(90deg)' : 'none',
+                      transition: 'transform 0.2s ease',
+                      flex: '0 0 auto'
+                    }}
+                  >
                     <Icon name="chev" size={16} />
                   </span>
                 </button>
@@ -250,7 +228,9 @@ function ReportBody({
       <div className="card" style={{ padding: 14 }}>
         <div className="row-between">
           <span className="card-label">Posture grade</span>
-          <span className={`mono ${gradeTone(report.summary.grade)}`}>{report.summary.grade} · {report.summary.score}/100</span>
+          <span className={`mono ${gradeTone(report.summary.grade)}`}>
+            {report.summary.grade} · {report.summary.score}/100
+          </span>
         </div>
       </div>
     </div>
